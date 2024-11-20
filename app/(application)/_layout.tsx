@@ -1,15 +1,21 @@
-import { Tabs } from "expo-router"
+import { Redirect, RelativePathString, Tabs } from "expo-router"
 import React from "react"
 import { Platform } from "react-native"
-
 import { HapticTab } from "@/components/HapticTab"
 import { IconSymbol } from "@/components/ui/IconSymbol"
 import TabBarBackground from "@/components/ui/TabBarBackground"
 import { Colors } from "@/constants/Colors"
 import { useColorScheme } from "@/hooks/useColorScheme"
+import { useAuth } from "@clerk/clerk-expo"
+import { LogOut } from "lucide-react-native"
 
-export default function TabLayout() {
+export default function ApplicationLayout() {
     const colorScheme = useColorScheme()
+    const { isSignedIn } = useAuth()
+
+    if (!isSignedIn) {
+        return <Redirect href={"/sign-in" as RelativePathString} />
+    }
 
     return (
         <Tabs
@@ -46,6 +52,16 @@ export default function TabLayout() {
                             name="paperplane.fill"
                             color={color}
                         />
+                    ),
+                }}
+            />
+
+            <Tabs.Screen
+                name="logout"
+                options={{
+                    title: "Account",
+                    tabBarIcon: ({ color }) => (
+                        <LogOut size={28} color={color} />
                     ),
                 }}
             />
