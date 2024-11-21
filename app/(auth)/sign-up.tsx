@@ -48,7 +48,6 @@ export default function SignUpScreen(): JSX.Element {
                 pendingVerification: true,
             }))
         } catch (error: any) {
-            console.error(JSON.stringify(error, null, 2))
             setError(error.errors[0].message)
         } finally {
             setSubmitting(false)
@@ -86,11 +85,17 @@ export default function SignUpScreen(): JSX.Element {
             <View className="flex-row items-center justify-center mb-10">
                 <Logo />
             </View>
-            {error && <View className="mb-4 text-red-300">{error}</View>}
+            {error && (
+                <View className="mb-4 text-red-300">
+                    <Text className="text-red-500" color={"red"}>
+                        {error}
+                    </Text>
+                </View>
+            )}
             <View className="w-full px-10">
                 {!formState.pendingVerification ? (
                     <>
-                        <View className="gap-2 mb-4">
+                        <View className="gap-4 mb-4">
                             <Input
                                 autoCapitalize="none"
                                 value={formState.emailAddress}
@@ -140,7 +145,7 @@ export default function SignUpScreen(): JSX.Element {
                                 }))
                             }
                         />
-                        <Button onPress={onPressVerify}>
+                        <Button onPress={onPressVerify} marginTop={7}>
                             {verifying ? "verifying..." : "Verify"}
                         </Button>
                     </View>

@@ -33,7 +33,6 @@ export default function Page() {
                 console.error(JSON.stringify(signInAttempt, null, 2))
             }
         } catch (err: any) {
-            console.error(JSON.stringify(err, null, 2))
             setError(err.errors[0].message)
         } finally {
             setSubmitting(false)
@@ -45,7 +44,11 @@ export default function Page() {
             <View className="flex-row items-center justify-center mb-10">
                 <Logo />
             </View>
-            {error && <View className="mb-4 text-red-300">{error}</View>}
+            {error && (
+                <View className="mb-4 text-red-300">
+                    <Text className="text-lg text-red-500">{error}</Text>
+                </View>
+            )}
             <View className="w-full px-10 gap-4">
                 <View className="gap-4">
                     <Input
