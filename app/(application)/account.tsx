@@ -1,10 +1,14 @@
 import { View, Text, TouchableOpacity } from "react-native"
-import { useClerk } from "@clerk/clerk-expo"
+import { useClerk, useUser } from "@clerk/clerk-expo"
 
 export default function LogoutScreen() {
     const { signOut } = useClerk()
 
+    const { user } = useUser()
+
     const handleLogoutPress = async () => await signOut()
+
+    console.log("user:", user?.imageUrl)
 
     return (
         <View className="flex-1 items-center justify-center gap-3 px-10">

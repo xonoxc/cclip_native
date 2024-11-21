@@ -1,5 +1,5 @@
 import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo"
-import { createTamagui, TamaguiProvider, View } from "tamagui"
+import { createTamagui, TamaguiProvider } from "tamagui"
 import defaultConfig from "@tamagui/config/v3"
 import {
     DarkTheme,
@@ -62,8 +62,14 @@ export default function RootLayout() {
                                 options={{ headerShown: false }}
                             />
                             <Stack.Screen name="+not-found" />
+
+                            <Stack.Screen
+                                name="(application)"
+                                options={{ headerShown: false }}
+                            />
                         </Stack>
-                        <StatusBar style="auto" />
+
+                        <StatusBar style="auto" animated />
                     </ThemeProvider>
                 </ClerkLoaded>
             </ClerkProvider>

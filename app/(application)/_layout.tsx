@@ -7,7 +7,7 @@ import TabBarBackground from "@/components/ui/TabBarBackground"
 import { Colors } from "@/constants/Colors"
 import { useColorScheme } from "@/hooks/useColorScheme"
 import { useAuth } from "@clerk/clerk-expo"
-import { LogOut } from "lucide-react-native"
+import { House, LogOut } from "lucide-react-native"
 
 export default function ApplicationLayout() {
     const colorScheme = useColorScheme()
@@ -21,7 +21,7 @@ export default function ApplicationLayout() {
         <Tabs
             screenOptions={{
                 tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-                headerShown: false,
+                headerShown: true,
                 tabBarButton: HapticTab,
                 tabBarBackground: TabBarBackground,
                 tabBarStyle: Platform.select({
@@ -37,9 +37,7 @@ export default function ApplicationLayout() {
                 name="index"
                 options={{
                     title: "Home",
-                    tabBarIcon: ({ color }) => (
-                        <IconSymbol size={28} name="house.fill" color={color} />
-                    ),
+                    tabBarIcon: ({ color }) => <House color={color} />,
                 }}
             />
             <Tabs.Screen
@@ -57,9 +55,9 @@ export default function ApplicationLayout() {
             />
 
             <Tabs.Screen
-                name="logout"
+                name="account"
                 options={{
-                    title: "Account",
+                    title: "account",
                     tabBarIcon: ({ color }) => (
                         <LogOut size={28} color={color} />
                     ),
