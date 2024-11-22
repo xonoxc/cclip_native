@@ -1,13 +1,18 @@
 import { Redirect, RelativePathString, Tabs } from "expo-router"
 import React from "react"
+import { SafeAreaView } from "react-native-safe-area-context"
 import { Platform } from "react-native"
 import { HapticTab } from "@/components/HapticTab"
-import { IconSymbol } from "@/components/ui/IconSymbol"
 import TabBarBackground from "@/components/ui/TabBarBackground"
 import { Colors } from "@/constants/Colors"
 import { useColorScheme } from "@/hooks/useColorScheme"
 import { useAuth } from "@clerk/clerk-expo"
-import { House, LogOut } from "lucide-react-native"
+import {
+    CircleUserRound,
+    FileImage,
+    FileVideo2,
+    House,
+} from "lucide-react-native"
 
 export default function ApplicationLayout() {
     const colorScheme = useColorScheme()
@@ -18,51 +23,58 @@ export default function ApplicationLayout() {
     }
 
     return (
-        <Tabs
-            screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-                headerShown: true,
-                tabBarButton: HapticTab,
-                tabBarBackground: TabBarBackground,
-                tabBarStyle: Platform.select({
-                    ios: {
-                        // Use a transparent background on iOS to show the blur effect
-                        position: "absolute",
-                    },
-                    default: {},
-                }),
-            }}
-        >
-            <Tabs.Screen
-                name="index"
-                options={{
-                    title: "Home",
-                    tabBarIcon: ({ color }) => <House color={color} />,
+        <SafeAreaView className="flex-1">
+            <Tabs
+                screenOptions={{
+                    tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+                    headerShown: true,
+                    tabBarButton: HapticTab,
+                    tabBarBackground: TabBarBackground,
+                    tabBarStyle: Platform.select({
+                        ios: {
+                            position: "absolute",
+                        },
+                        default: {},
+                    }),
                 }}
-            />
-            <Tabs.Screen
-                name="explore"
-                options={{
-                    title: "Explore",
-                    tabBarIcon: ({ color }) => (
-                        <IconSymbol
-                            size={28}
-                            name="paperplane.fill"
-                            color={color}
-                        />
-                    ),
-                }}
-            />
+            >
+                <Tabs.Screen
+                    name="index"
+                    options={{
+                        title: "Home",
+                        headerShown: false,
+                        tabBarIcon: ({ color }) => <House color={color} />,
+                    }}
+                />
+                <Tabs.Screen
+                    name="image"
+                    options={{
+                        title: "Image Upload",
+                        headerShown: false,
+                        tabBarIcon: ({ color }) => <FileImage color={color} />,
+                    }}
+                />
 
-            <Tabs.Screen
-                name="account"
-                options={{
-                    title: "account",
-                    tabBarIcon: ({ color }) => (
-                        <LogOut size={28} color={color} />
-                    ),
-                }}
-            />
-        </Tabs>
+                <Tabs.Screen
+                    name="video"
+                    options={{
+                        title: "Video Upload",
+                        headerShown: false,
+                        tabBarIcon: ({ color }) => <FileVideo2 color={color} />,
+                    }}
+                />
+
+                <Tabs.Screen
+                    name="account"
+                    options={{
+                        title: "account",
+                        headerShown: false,
+                        tabBarIcon: ({ color }) => (
+                            <CircleUserRound color={color} />
+                        ),
+                    }}
+                />
+            </Tabs>
+        </SafeAreaView>
     )
 }

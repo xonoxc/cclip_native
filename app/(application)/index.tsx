@@ -1,9 +1,9 @@
-import { View, Text } from "tamagui"
+import { View, Text } from "react-native"
 
-export default function Index() {
+export default function HomeScreen() {
     return (
         <View>
-            <Text>Index Screen</Text>
+            <Text className="text-white">Home Screen</Text>
         </View>
     )
 }

@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from "react-native"
 import { useClerk, useUser } from "@clerk/clerk-expo"
 
-export default function LogoutScreen() {
+export default function AccountScreen() {
     const { signOut } = useClerk()
 
     const { user } = useUser()
@@ -15,7 +15,7 @@ export default function LogoutScreen() {
             <Text className="text-white">Logout Screen</Text>
             <TouchableOpacity
                 onPress={handleLogoutPress}
-                className="text-black bg-white p-4 rounded"
+                className="text-black bg-white p-4 rounded-lg"
             >
                 <Text>Logout</Text>
             </TouchableOpacity>
