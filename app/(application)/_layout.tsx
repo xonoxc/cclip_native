@@ -28,13 +28,16 @@ export default function ApplicationLayout() {
                 screenOptions={{
                     tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
                     headerShown: true,
+                    animation: "shift",
                     tabBarButton: HapticTab,
                     tabBarBackground: TabBarBackground,
                     tabBarStyle: Platform.select({
                         ios: {
                             position: "absolute",
                         },
-                        default: {},
+                        default: {
+                            position: "absolute",
+                        },
                     }),
                 }}
             >

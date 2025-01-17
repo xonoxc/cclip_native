@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native"
+import { View, Text, TouchableOpacity, Image } from "react-native"
 import { useClerk, useUser } from "@clerk/clerk-expo"
 
 export default function AccountScreen() {
@@ -8,10 +8,9 @@ export default function AccountScreen() {
 
     const handleLogoutPress = async () => await signOut()
 
-    console.log("user:", user?.imageUrl)
-
     return (
         <View className="flex-1 items-center justify-center gap-3 px-10">
+            <Image src={user?.imageUrl} />
             <Text className="text-white">Logout Screen</Text>
             <TouchableOpacity
                 onPress={handleLogoutPress}

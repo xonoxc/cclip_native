@@ -11,7 +11,6 @@ export async function GET(_: Request) {
                 createdAt: "desc",
             },
         })
-
         return Response.json(videos)
     } catch (error) {
         return Response.json(

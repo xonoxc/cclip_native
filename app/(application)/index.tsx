@@ -2,8 +2,17 @@ import * as FileSystem from "expo-file-system"
 import * as Sharing from "expo-sharing"
 import { Video } from "@prisma/client/react-native"
 import { useCallback, useEffect, useState } from "react"
-import { View, Text, Alert, ActivityIndicator, FlatList } from "react-native"
-import axios from "axios"
+import {
+    View,
+    Text,
+    Alert,
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+} from "react-native"
+import VideoCard from "@/components/ui/VideoCard"
+import { apiClient } from "@/lib/apiClient"
+import { ScrollView } from "tamagui"
 
 export default function HomeScreen() {
     const [videos, setVideos] = useState<Video[]>([])
@@ -12,7 +21,7 @@ export default function HomeScreen() {
 
     const fetchVideos = useCallback(async () => {
         try {
-            const response = await axios.get("/api/videos")
+            const response = await apiClient.get("/api/videos")
             if (Array.isArray(response.data)) {
                 setVideos(response.data)
             } else {
@@ -33,7 +42,7 @@ export default function HomeScreen() {
     const handleDeletePress = useCallback(
         async (videoId: string, public_id: string) => {
             try {
-                const deleteResponse = await axios.delete("/api/videos", {
+                const deleteResponse = await apiClient.delete("/api/videos", {
                     data: {
                         videoId,
                         public_id,
@@ -76,9 +85,13 @@ export default function HomeScreen() {
     )
 
     return (
-        <View className="flex-1 bg-black p-4">
+        <ScrollView
+            className="flex-1 bg-black p-4 border-2 h-screen-safe border-white"
+            refreshControl={
+                <RefreshControl refreshing={loading} onRefresh={fetchVideos} />
+            }
+        >
             <Text className="text-2xl font-bold mb-4 text-white">Videos</Text>
-            {error && <Text className="text-red-500 mb-4">{error}</Text>}
             {loading ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color="#ffffff" />
@@ -86,7 +99,11 @@ export default function HomeScreen() {
             ) : videos.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
                     <Text className="text-lg text-gray-500">
-                        No videos available
+                        {error ? (
+                            <Text className="text-red-500 mb-4">{error}</Text>
+                        ) : (
+                            <Text>No videos available</Text>
+                        )}
                     </Text>
                 </View>
             ) : (
@@ -96,15 +113,15 @@ export default function HomeScreen() {
                     renderItem={({ item }) => (
                         <VideoCard
                             video={item}
-                            onDownload={handleDownload}
-                            onDelete={handleDeleteClick}
+                            onDownload={handleDownloadPress}
+                            onDelete={handleDeletePress}
                             className="mb-6"
                         />
                     )}
                     contentContainerStyle={{ paddingBottom: 16 }}
-                    numColumns={2} // Adjust the number of columns as needed
+                    numColumns={2}
                 />
             )}
-        </View>
+        </ScrollView>
     )
 }
