@@ -11,7 +11,7 @@ export default function AccountScreen() {
     const handleLogoutPress = async () => await signOut()
 
     return (
-        <ScrollView className="flex-1 bg-black">
+        <View className="flex-1 bg-black">
             <View className="min-h-screen">
                 <Animatable.View
                     animation="fadeIn"
@@ -37,7 +37,7 @@ export default function AccountScreen() {
 
                     <View className="bg-[#161617] rounded-xl p-4 mb-4">
                         <View className="flex-row items-center mb-4">
-                            <User color={"white"} />
+                            <User color={"#9ca3af"} />
                             <View className="ml-4">
                                 <Text className="text-gray-400 text-sm">
                                     Username
@@ -49,7 +49,7 @@ export default function AccountScreen() {
                         </View>
 
                         <View className="flex-row items-center">
-                            <Mail color={"white"} />
+                            <Mail color={"#9ca3af"} />
                             <View className="ml-4">
                                 <Text className="text-gray-400 text-sm">
                                     Email
@@ -76,6 +76,6 @@ export default function AccountScreen() {
 
                 <AppVersion />
             </View>
-        </ScrollView>
+        </View>
     )
 }

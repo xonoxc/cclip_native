@@ -45,7 +45,7 @@ const VideoCard = ({
     )
 
     return (
-        <View className="bg-[#161617] border border-white/10 rounded-xl overflow-hidden m-2 flex-1">
+        <View className="bg-[#161617] border border-white/10 rounded-3xl overflow-hidden m-2 flex-1">
             <View className="relative aspect-video">
                 <Image
                     source={{ uri: getThumbnailUrl(video.publicId) }}

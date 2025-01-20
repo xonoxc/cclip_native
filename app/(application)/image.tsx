@@ -81,7 +81,7 @@ export default function ImageUploadScreen() {
                 </Text>
             </View>
 
-            <View className="bg-[#161717] rounded-lg p-4">
+            <View className="bg-[#161717] rounded-2xl p-4">
                 {!imageUri && (
                     <>
                         <Text className="text-lg font-bold text-white mb-4">
@@ -90,7 +90,7 @@ export default function ImageUploadScreen() {
 
                         <TouchableOpacity
                             onPress={handleImagePick}
-                            className="bg-gray-700 p-4 py-6 rounded-xl items-center flex flex-row  justify-center gap-2 space-x-2"
+                            className="bg-gray-700 p-4 py-4 rounded-xl items-center flex flex-row  justify-center gap-2 space-x-2"
                         >
                             <Upload color={"white"} />
                             <Text className="text-white">Choose an image</Text>
