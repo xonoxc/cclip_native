@@ -1,6 +1,6 @@
 import * as FileSystem from "expo-file-system"
 import * as Sharing from "expo-sharing"
-import { Video } from "@prisma/client/react-native"
+import { Video } from "@prisma/client"
 import { useCallback, useEffect, useState } from "react"
 import {
     View,
@@ -12,7 +12,6 @@ import {
 } from "react-native"
 import VideoCard from "@/components/ui/VideoCard"
 import { apiClient } from "@/lib/apiClient"
-import { ScrollView } from "tamagui"
 
 export default function HomeScreen() {
     const [videos, setVideos] = useState<Video[]>([])
@@ -63,10 +62,19 @@ export default function HomeScreen() {
 
     const handleDownloadPress = useCallback(
         async (url: string, title: string) => {
-            try {
-                const fileUri = `${FileSystem.documentDirectory}${title}.mp4`
+            const directory = `${FileSystem.documentDirectory}downloads/`
 
-                const { uri } = await FileSystem.downloadAsync(url, fileUri)
+            try {
+                const dirInfo = await FileSystem.getInfoAsync(directory)
+                if (!dirInfo.exists) {
+                    await FileSystem.makeDirectoryAsync(directory, {
+                        intermediates: true,
+                    })
+                }
+
+                const fileURI = directory + `${title}.mp4`
+
+                const { uri } = await FileSystem.downloadAsync(url, fileURI)
 
                 if (await Sharing.isAvailableAsync()) {
                     await Sharing.shareAsync(uri)
@@ -85,26 +93,20 @@ export default function HomeScreen() {
     )
 
     return (
-        <ScrollView
-            className="flex-1 bg-black p-4 border-2 h-screen-safe border-white"
-            refreshControl={
-                <RefreshControl refreshing={loading} onRefresh={fetchVideos} />
-            }
-        >
-            <Text className="text-2xl font-bold mb-4 text-white">Videos</Text>
+        <View className="flex-1 bg-black p-4  h-screen-safe">
+            <Text className="text-6xl font-bold my-4 text-white">Videos</Text>
+
             {loading ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color="#ffffff" />
                 </View>
             ) : videos.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
-                    <Text className="text-lg text-gray-500">
-                        {error ? (
-                            <Text className="text-red-500 mb-4">{error}</Text>
-                        ) : (
-                            <Text>No videos available</Text>
-                        )}
-                    </Text>
+                    {error ? (
+                        <Text className="text-red-500 mb-4">{error}</Text>
+                    ) : (
+                        <Text>No videos available</Text>
+                    )}
                 </View>
             ) : (
                 <FlatList
@@ -115,13 +117,18 @@ export default function HomeScreen() {
                             video={item}
                             onDownload={handleDownloadPress}
                             onDelete={handleDeletePress}
-                            className="mb-6"
                         />
                     )}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={loading}
+                            onRefresh={fetchVideos}
+                        />
+                    }
                     contentContainerStyle={{ paddingBottom: 16 }}
                     numColumns={2}
                 />
             )}
-        </ScrollView>
+        </View>
     )
 }

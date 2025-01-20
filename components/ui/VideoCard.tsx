@@ -1,11 +1,9 @@
 import React, { useCallback } from "react"
 import { View, Text, Image, TouchableOpacity } from "react-native"
-import { Badge, Clock, Download, Trash } from "lucide-react-native"
+import { Clock, Download, Trash } from "lucide-react-native"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
-// import { filesize } from "filesize"
-import { Video } from "@prisma/client/react-native"
-import { Progress } from "tamagui"
+import { Video } from "@prisma/client"
 import { cloud } from "@/lib/cloudinary"
 
 dayjs.extend(relativeTime)
@@ -14,12 +12,10 @@ const VideoCard = ({
     video,
     onDownload,
     onDelete,
-    className,
 }: {
     video: Video
     onDownload: (url: string, publicId: string) => void
     onDelete: (videoId: string, publicId: string) => void
-    className: string
 }) => {
     const getThumbnailUrl = useCallback((publicId: string) => {
         return cloud
@@ -33,10 +29,6 @@ const VideoCard = ({
         return cloud.video(publicId).toURL()
     }, [])
 
-    // const formatSize = useCallback((size: string) => {
-    //     return size !== "undefined" ? filesize(parseInt(size)) : "N/A"
-    // }, [])
-
     const formatDuration = useCallback((seconds: number) => {
         const minutes = Math.floor(seconds / 60)
         const remainingSeconds = Math.round(seconds % 60)
@@ -45,91 +37,88 @@ const VideoCard = ({
 
     const calcCompressionPercentage = useCallback(
         (compressedSize: number, originalSize: number) => {
-            const percentage = ((compressedSize / originalSize) * 100).toFixed(
-                2
-            )
-            return parseFloat(percentage)
+            if (originalSize === 0) return 0
+            const percentage = (compressedSize / originalSize) * 100
+            return Math.round(percentage * 100) / 100
         },
         []
     )
 
     return (
-        <View
-            className={`overflow-hidden transition-all duration-300 hover:shadow-lg bg-[#161617] border border-white/10 rounded-xl ${className}`}
-        >
-            <View className="relative aspect-video group">
+        <View className="bg-[#161617] border border-white/10 rounded-xl overflow-hidden m-2 flex-1">
+            <View className="relative aspect-video">
                 <Image
                     source={{ uri: getThumbnailUrl(video.publicId) }}
-                    alt={video.title}
-                    className="w-full h-full object-cover rounded-t-xl"
+                    className="w-full h-full object-cover"
                 />
-                <View className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Badge className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white">
-                    <Clock className="w-3 h-3 mr-1" />
-                    {formatDuration(Number(video.duration))}
-                </Badge>
+                <View className="absolute inset-0 bg-black bg-opacity-40" />
+                <View className="absolute bottom-2 right-2 bg-black bg-opacity-75 px-2 py-1 rounded flex-row items-center">
+                    <Clock className="w-3 h-3 mr-1 text-white" />
+                    <Text className="text-white text-xs">
+                        {formatDuration(Number(video.duration))}
+                    </Text>
+                </View>
             </View>
-            <View className="pb-2">
-                <Text className="text-lg font-semibold line-clamp-1 text-white">
+            <View className="p-4">
+                <Text className="text-lg font-semibold text-white mb-2">
                     {video.title}
                 </Text>
-            </View>
-            <View className="space-y-4">
-                <Text className="text-sm text-white/70 line-clamp-2">
+                <Text className="text-sm text-white/70 mb-2">
                     {video.description}
                 </Text>
-                <Text className="text-xs text-white/50">
+                <Text className="text-xs text-white/50 mb-2">
                     Uploaded {dayjs(video.createdAt).fromNow()}
                 </Text>
                 {video.compressedSize.toString() !== "undefined" ? (
-                    <>
-                        <View className="grid grid-cols-2 gap-4 text-sm text-white"></View>
-                        <View className="space-y-2 text-white">
-                            <View className="flex justify-between text-sm">
-                                <Text>Compression</Text>
-                                <Text className="font-medium">
-                                    {calcCompressionPercentage(
-                                        parseInt(video.compressedSize),
-                                        parseInt(video.originalSize)
-                                    )}
-                                    %
-                                </Text>
-                            </View>
-                            <Progress
-                                value={calcCompressionPercentage(
+                    <View className="mb-2">
+                        <View className="flex-row justify-between text-sm text-white mb-1">
+                            <Text>Compression</Text>
+                            <Text className="font-medium">
+                                {calcCompressionPercentage(
                                     parseInt(video.compressedSize),
                                     parseInt(video.originalSize)
                                 )}
-                                className="h-2 bg-white/10"
+                                %
+                            </Text>
+                        </View>
+                        {/* Replace this with an actual Progress component */}
+                        <View className="h-2 bg-white/10 rounded">
+                            <View
+                                className="h-full bg-white rounded"
+                                style={{
+                                    width: `${calcCompressionPercentage(
+                                        parseInt(video.compressedSize),
+                                        parseInt(video.originalSize)
+                                    )}%`,
+                                }}
                             />
                         </View>
-                    </>
+                    </View>
                 ) : (
-                    <Badge className="bg-white/10 text-white">
-                        Cannot compress
-                    </Badge>
+                    <View className="bg-white/10 text-white px-2 py-1 rounded">
+                        <Text>Cannot compress</Text>
+                    </View>
                 )}
-            </View>
-            <View className="flex items-center justify-between gap-2 pt-4">
-                <TouchableOpacity
-                    className="flex-1 bg-white text-black hover:bg-white/90 transition-colors"
-                    onPress={() =>
-                        onDownload(
-                            getFullVideoUrl(video.publicId),
-                            video.publicId
-                        )
-                    }
-                >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={() => onDelete(video.id, video.publicId)}
-                    className="bg-white/10 text-white hover:bg-white/20 transition-colors p-2"
-                >
-                    <Trash className="w-4 h-4" />
-                </TouchableOpacity>
+                <View className="flex-row items-center justify-between mt-4">
+                    <TouchableOpacity
+                        className="flex-1 bg-white text-black py-2 rounded flex-row items-center justify-center mr-2"
+                        onPress={() =>
+                            onDownload(
+                                getFullVideoUrl(video.publicId),
+                                video.publicId
+                            )
+                        }
+                    >
+                        <Download className="w-4 h-4 mr-2 text-black" />
+                        <Text className="text-black">Download</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => onDelete(video.id, video.publicId)}
+                        className="bg-white/10 text-white p-2 rounded"
+                    >
+                        <Trash className="w-4 h-4 text-white" />
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     )

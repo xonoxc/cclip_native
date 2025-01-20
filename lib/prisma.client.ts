@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client/react-native"
+import { PrismaClient } from "prisma/prisma-client"
 
 const dbClient = new PrismaClient()
-
-console.log("dbClient", dbClient)
 
 export { dbClient }
