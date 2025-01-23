@@ -7,8 +7,8 @@ import {
     Text,
     Alert,
     ActivityIndicator,
-    FlatList,
     RefreshControl,
+    FlatList,
 } from "react-native"
 import VideoCard from "@/components/ui/VideoCard"
 import { apiClient } from "@/lib/apiClient"
@@ -109,25 +109,27 @@ export default function HomeScreen() {
                     )}
                 </View>
             ) : (
-                <FlatList
-                    data={videos}
-                    keyExtractor={item => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <VideoCard
-                            video={item}
-                            onDownload={handleDownloadPress}
-                            onDelete={handleDeletePress}
-                        />
-                    )}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={loading}
-                            onRefresh={fetchVideos}
-                        />
-                    }
-                    contentContainerStyle={{ paddingBottom: 16 }}
-                    numColumns={2}
-                />
+                <View style={{ minHeight: 2 }}>
+                    <FlatList
+                        data={videos}
+                        keyExtractor={item => item.id.toString()}
+                        renderItem={({ item }) => (
+                            <VideoCard
+                                video={item}
+                                onDownload={handleDownloadPress}
+                                onDelete={handleDeletePress}
+                            />
+                        )}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={loading}
+                                onRefresh={fetchVideos}
+                            />
+                        }
+                        contentContainerStyle={{ paddingBottom: 16 }}
+                        numColumns={2}
+                    />
+                </View>
             )}
         </View>
     )

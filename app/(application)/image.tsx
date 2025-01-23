@@ -1,5 +1,8 @@
 import { SocialFormat, socialFormats } from "@/constants/formats"
 import React, { useCallback, useState } from "react"
+import * as FileSystem from "expo-file-system"
+
+import * as Sharing from "expo-sharing"
 import {
     View,
     Text,
@@ -10,7 +13,7 @@ import {
     Alert,
 } from "react-native"
 import * as ImagePicker from "expo-image-picker"
-import { MessagesSquare, Upload } from "lucide-react-native"
+import { Upload } from "lucide-react-native"
 import { apiClient } from "@/lib/apiClient"
 import Select from "react-native-picker-select"
 
@@ -71,7 +74,37 @@ export default function ImageUploadScreen() {
         }
     }, [])
 
-    const handleDownloadPress = useCallback(() => {}, [])
+    const handleDownloadPress = useCallback(async () => {
+        const directory = `${FileSystem.documentDirectory}downloads/`
+
+        try {
+            const dirInfo = await FileSystem.getInfoAsync(directory)
+            if (!dirInfo.exists) {
+                await FileSystem.makeDirectoryAsync(directory, {
+                    intermediates: true,
+                })
+            }
+
+            const fileURI = directory + "image.jpg"
+
+            const { uri } = await FileSystem.downloadAsync(
+                imageUri as string,
+                fileURI
+            )
+
+            if (await Sharing.isAvailableAsync()) {
+                await Sharing.shareAsync(uri)
+            } else {
+                Alert.alert(
+                    "Download Complete",
+                    "The file has been saved to your device."
+                )
+            }
+        } catch (error) {
+            console.error("Download error:", error)
+            Alert.alert("Error", "Failed to download the file.")
+        }
+    }, [])
 
     return (
         <ScrollView className="flex-1 bg-black p-4">

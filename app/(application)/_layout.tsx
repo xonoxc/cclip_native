@@ -31,6 +31,7 @@ export default function ApplicationLayout() {
                         tabBarActiveTintColor:
                             Colors[colorScheme ?? "light"].tint,
                         headerShown: true,
+                        tabBarHideOnKeyboard: true,
                         animation: "shift",
                         tabBarButton: HapticTab,
                         tabBarBackground: TabBarBackground,

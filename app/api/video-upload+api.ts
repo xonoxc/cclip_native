@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from "cloudinary"
 import { cloudinaryConfg } from "@/lib/cloudinary"
-import { CloudinaryUploadResult } from "@/app/api/image-upload+api"
+import { CloudinaryUploadResult } from "@/app/api/imageupload+api"
 import { dbClient } from "@/lib/prisma.client"
 
 cloudinary.config(cloudinaryConfg)
@@ -13,7 +13,7 @@ interface VideoUploadResult extends CloudinaryUploadResult {
 export async function POST(request: Request) {
     try {
         if (
-            !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
+            !process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME ||
             !process.env.CLOUDINARY_API_KEY ||
             !process.env.CLOUDINARY_API_SECRET
         ) {

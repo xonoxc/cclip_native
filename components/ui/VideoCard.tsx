@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity } from "react-native"
 import { Clock, Download, Trash } from "lucide-react-native"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
+import { Progress } from "tamagui"
 import { Video } from "@prisma/client"
 import { cloud } from "@/lib/cloudinary"
 
@@ -18,11 +19,14 @@ const VideoCard = ({
     onDelete: (videoId: string, publicId: string) => void
 }) => {
     const getThumbnailUrl = useCallback((publicId: string) => {
-        return cloud
-            .video(publicId)
-            .setAssetType("image")
-            .addTransformation("so_8.5")
-            .toURL()
+        const baseURL = process.env.EXPO_PUBLIC_CLOUDINARY_THUMBNAIL_URL!
+        if (!baseURL) {
+            throw new Error(
+                "Please set EXPO_PUBLIC_CLOUDINARY_THUMBNAIL_URL in .env"
+            )
+        }
+
+        return `${baseURL}/${publicId}.jpg`
     }, [])
 
     const getFullVideoUrl = useCallback((publicId: string) => {
@@ -51,9 +55,12 @@ const VideoCard = ({
                     source={{ uri: getThumbnailUrl(video.publicId) }}
                     className="w-full h-full object-cover"
                 />
-                <View className="absolute inset-0 bg-black bg-opacity-40" />
-                <View className="absolute bottom-2 right-2 bg-black bg-opacity-75 px-2 py-1 rounded flex-row items-center">
-                    <Clock className="w-3 h-3 mr-1 text-white" />
+                <View className="absolute bottom-2 right-2 bg-black px-2 py-1 rounded-lg flex-row items-center gap-2">
+                    <Clock
+                        color="white"
+                        size={14}
+                        className="w-3 h-3 mr-1 text-white"
+                    />
                     <Text className="text-white text-xs">
                         {formatDuration(Number(video.duration))}
                     </Text>
@@ -72,8 +79,8 @@ const VideoCard = ({
                 {video.compressedSize.toString() !== "undefined" ? (
                     <View className="mb-2">
                         <View className="flex-row justify-between text-sm text-white mb-1">
-                            <Text>Compression</Text>
-                            <Text className="font-medium">
+                            <Text className="text-white">Compression</Text>
+                            <Text className="font-medium text-white">
                                 {calcCompressionPercentage(
                                     parseInt(video.compressedSize),
                                     parseInt(video.originalSize)
@@ -81,18 +88,19 @@ const VideoCard = ({
                                 %
                             </Text>
                         </View>
-                        {/* Replace this with an actual Progress component */}
-                        <View className="h-2 bg-white/10 rounded">
-                            <View
-                                className="h-full bg-white rounded"
-                                style={{
-                                    width: `${calcCompressionPercentage(
-                                        parseInt(video.compressedSize),
-                                        parseInt(video.originalSize)
-                                    )}%`,
-                                }}
+                        <Progress
+                            value={Math.round(
+                                calcCompressionPercentage(
+                                    parseInt(video.compressedSize),
+                                    parseInt(video.originalSize)
+                                )
+                            )}
+                        >
+                            <Progress.Indicator
+                                animation="bouncy"
+                                backgroundColor={"gray"}
                             />
-                        </View>
+                        </Progress>
                     </View>
                 ) : (
                     <View className="bg-white/10 text-white px-2 py-1 rounded">
@@ -101,7 +109,7 @@ const VideoCard = ({
                 )}
                 <View className="flex-row items-center justify-between mt-4">
                     <TouchableOpacity
-                        className="flex-1 bg-white text-black py-2 rounded flex-row items-center justify-center mr-2"
+                        className="flex-1 bg-white text-black py-2 rounded-xl flex-row items-center justify-center mr-2"
                         onPress={() =>
                             onDownload(
                                 getFullVideoUrl(video.publicId),
@@ -114,9 +122,9 @@ const VideoCard = ({
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => onDelete(video.id, video.publicId)}
-                        className="bg-white/10 text-white p-2 rounded"
+                        className="bg-white text-white p-2 rounded-xl"
                     >
-                        <Trash className="w-4 h-4 text-white" />
+                        <Trash className="w-4 h-4 text-black" color={"black"} />
                     </TouchableOpacity>
                 </View>
             </View>
