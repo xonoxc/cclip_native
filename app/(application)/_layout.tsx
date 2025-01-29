@@ -1,7 +1,7 @@
 import { Redirect, RelativePathString, Tabs } from "expo-router"
 import React from "react"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { Gesture, GestureHandlerRootView } from "react-native-gesture-handler"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { Platform } from "react-native"
 import { HapticTab } from "@/components/HapticTab"
 import TabBarBackground from "@/components/ui/TabBarBackground"
