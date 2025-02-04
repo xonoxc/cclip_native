@@ -4,230 +4,245 @@ import * as FileSystem from "expo-file-system"
 
 import * as Sharing from "expo-sharing"
 import {
-	View,
-	Text,
-	TouchableOpacity,
-	ScrollView,
-	ActivityIndicator,
-	Alert,
+    View,
+    Text,
+    TouchableOpacity,
+    ScrollView,
+    ActivityIndicator,
+    Alert,
 } from "react-native"
 import * as ImagePicker from "expo-image-picker"
 import { Upload } from "lucide-react-native"
 import Select from "react-native-picker-select"
-import { Image } from 'tamagui';
+import { Image } from "expo-image"
 import { cloudinaryConfg } from "@/lib/cloudinary"
 import { useImageTransformation } from "@/hooks/useTrasformation"
 
 import axios from "axios"
 
 export default function ImageUploadScreen() {
-	const [imageUri, setImageUri] = useState<string | null>(null)
-	const [uploadedImagePublicID, setUploadedImagePublicID] = useState<string | null>(
-		null
-	)
-	const [selectedFormat, setSelectedFormat] = useState<SocialFormat>(
-		"Instagram Square (1:1)"
-	)
-	const [isUploading, setIsUploading] = useState<boolean>(false)
+    const [imageUri, setImageUri] = useState<string | null>(null)
+    const [uploadedImagePublicID, setUploadedImagePublicID] = useState<
+        string | null
+    >(null)
+    const [selectedFormat, setSelectedFormat] = useState<SocialFormat>(
+        "Instagram Square (1:1)"
+    )
+    const [isUploading, setIsUploading] = useState<boolean>(false)
 
-	const { url } = useImageTransformation({
-		width: socialFormats[selectedFormat].width,
-		height: socialFormats[selectedFormat].height,
-		aspectRatio: socialFormats[selectedFormat].aspectRatio,
-		publicID: uploadedImagePublicID!
-	})
+    const { url } = useImageTransformation({
+        width: socialFormats[selectedFormat].width,
+        height: socialFormats[selectedFormat].height,
+        aspectRatio: socialFormats[selectedFormat].aspectRatio,
+        publicID: uploadedImagePublicID!,
+    })
 
-	const handleImagePick = useCallback(async () => {
-		const permission =
-			await ImagePicker.requestMediaLibraryPermissionsAsync()
-		if (permission.granted) {
-			const result = await ImagePicker.launchImageLibraryAsync({
-				mediaTypes: "images",
-				allowsEditing: false,
-				quality: 1,
-			})
-			if (!result.canceled && result.assets && result.assets.length > 0 && result.assets[0].uri) {
-				const pickedURI = result.assets[0].uri
-				setImageUri(pickedURI)
-				await handleImageUpload(pickedURI)
-			}
-		} else {
-			alert("Permission to access media library is required!")
-		}
-	}, [])
+    const handleImagePick = useCallback(async () => {
+        const permission =
+            await ImagePicker.requestMediaLibraryPermissionsAsync()
+        if (permission.granted) {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: "images",
+                allowsEditing: false,
+                quality: 1,
+            })
+            if (
+                !result.canceled &&
+                result.assets &&
+                result.assets.length > 0 &&
+                result.assets[0].uri
+            ) {
+                const pickedURI = result.assets[0].uri
+                setImageUri(pickedURI)
+                await handleImageUpload(pickedURI)
+            }
+        } else {
+            alert("Permission to access media library is required!")
+        }
+    }, [])
 
-	const handleImageUpload = useCallback(async (uri: string) => {
-		try {
-			if (!uri) {
-				Alert.alert("Error", "No image selected");
-				return;
-			}
+    const handleImageUpload = useCallback(
+        async (uri: string) => {
+            try {
+                if (!uri) {
+                    Alert.alert("Error", "No image selected")
+                    return
+                }
 
-			setIsUploading(true);
+                setIsUploading(true)
 
-			const formData = new FormData();
+                const formData = new FormData()
 
-			formData.append("file", {
-				uri: uri,
-				type: "image/jpeg",
-				name: "image.jpg",
-			} as any);
+                formData.append("file", {
+                    uri: uri,
+                    type: "image/jpeg",
+                    name: "image.jpg",
+                } as any)
 
-			formData.append("upload_preset", "cclip_native")
-			formData.append("folder", "cclip")
-			formData.append("timestamp", (Date.now() / 1000).toString())
+                formData.append("upload_preset", "cclip_native")
+                formData.append("folder", "cclip")
+                formData.append("timestamp", (Date.now() / 1000).toString())
 
-			const response = await axios.post(
-				`${process.env.EXPO_PUBLIC_CLOUDINARY_BASE_URL!}/${cloudinaryConfg.cloud_name}/upload`,
-				formData,
-				{
-					headers: {
-						"Content-Type": "multipart/form-data",
-					},
-				}
-			);
+                const response = await axios.post(
+                    `${process.env.EXPO_PUBLIC_CLOUDINARY_BASE_URL!}/${cloudinaryConfg.cloud_name}/upload`,
+                    formData,
+                    {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    }
+                )
 
-			if (response.data) {
-				setUploadedImagePublicID(response.data.public_id)
-			}
+                if (response.data) {
+                    setUploadedImagePublicID(response.data.public_id)
+                }
+            } catch (e) {
+                if (axios.isAxiosError(e)) {
+                    console.error(
+                        "Upload failed:",
+                        e.response?.data || e.message
+                    )
+                    Alert.alert(
+                        "Upload Failed",
+                        e.response?.data?.message || "Unknown error"
+                    )
+                } else {
+                    console.error("Unexpected error:", e)
+                    Alert.alert("Error", "Unexpected error during upload")
+                }
+            } finally {
+                setIsUploading(false)
+            }
+        },
+        [imageUri]
+    )
 
-		} catch (e) {
-			if (axios.isAxiosError(e)) {
-				console.error("Upload failed:", e.response?.data || e.message)
-				Alert.alert("Upload Failed", e.response?.data?.message || "Unknown error");
-			} else {
-				console.error("Unexpected error:", e)
-				Alert.alert("Error", "Unexpected error during upload")
-			}
-		} finally {
-			setIsUploading(false);
-		}
-	}, [imageUri]);
+    const handleDownloadPress = useCallback(async () => {
+        const directory = `${FileSystem.documentDirectory}downloads/`
 
+        try {
+            const dirInfo = await FileSystem.getInfoAsync(directory)
+            if (!dirInfo.exists) {
+                await FileSystem.makeDirectoryAsync(directory, {
+                    intermediates: true,
+                })
+            }
 
-	const handleDownloadPress = useCallback(async () => {
-		const directory = `${FileSystem.documentDirectory}downloads/`
+            const fileURI = directory + "image.jpg"
 
-		try {
-			const dirInfo = await FileSystem.getInfoAsync(directory)
-			if (!dirInfo.exists) {
-				await FileSystem.makeDirectoryAsync(directory, {
-					intermediates: true,
-				})
-			}
+            const { uri } = await FileSystem.downloadAsync(
+                url as string,
+                fileURI
+            )
 
-			const fileURI = directory + "image.jpg"
+            if (await Sharing.isAvailableAsync()) {
+                await Sharing.shareAsync(uri)
+            } else {
+                Alert.alert(
+                    "Download Complete",
+                    "The file has been saved to your device."
+                )
+            }
+        } catch (error) {
+            console.error("Download error:", error)
+            Alert.alert("Error", "Failed to download the file.")
+        }
+    }, [])
 
-			const { uri } = await FileSystem.downloadAsync(
-				url as string,
-				fileURI
-			)
+    return (
+        <ScrollView className="flex-1 bg-black p-4">
+            <View className="mb-6 flex-1 items-start">
+                <Text className="text-6xl font-bold text-[#cccccc] mt-2 ">
+                    Image
+                </Text>
+            </View>
 
-			if (await Sharing.isAvailableAsync()) {
-				await Sharing.shareAsync(uri)
-			} else {
-				Alert.alert(
-					"Download Complete",
-					"The file has been saved to your device."
-				)
-			}
-		} catch (error) {
-			console.error("Download error:", error)
-			Alert.alert("Error", "Failed to download the file.")
-		}
-	}, [])
+            <View className="bg-[#161717] rounded-2xl p-4">
+                {!imageUri && (
+                    <>
+                        <Text className="text-lg font-bold text-white mb-4">
+                            Upload an Image
+                        </Text>
 
+                        <TouchableOpacity
+                            onPress={handleImagePick}
+                            className="bg-gray-700 p-4 py-4 rounded-xl items-center flex flex-row  justify-center gap-2 space-x-2"
+                        >
+                            <Upload color={"white"} />
+                            <Text className="text-white">Choose an image</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
 
-	return (
-		<ScrollView className="flex-1 bg-black p-4">
-			<View className="mb-6 flex-1 items-start">
-				<Text className="text-6xl font-bold text-[#cccccc] mt-2 ">
-					Image
-				</Text>
-			</View>
+                {isUploading && (
+                    <View className="mt-4">
+                        <ActivityIndicator size="large" color="#ffffff" />
+                    </View>
+                )}
 
-			<View className="bg-[#161717] rounded-2xl p-4">
-				{!imageUri && (
-					<>
-						<Text className="text-lg font-bold text-white mb-4">
-							Upload an Image
-						</Text>
+                <ScrollView>
+                    {imageUri && (
+                        <View className="mt-6">
+                            <Text className="text-lg font-bold text-white mb-4">
+                                Select Social Media Format
+                            </Text>
 
-						<TouchableOpacity
-							onPress={handleImagePick}
-							className="bg-gray-700 p-4 py-4 rounded-xl items-center flex flex-row  justify-center gap-2 space-x-2"
-						>
-							<Upload color={"white"} />
-							<Text className="text-white">Choose an image</Text>
-						</TouchableOpacity>
-					</>
-				)}
+                            <Select
+                                onValueChange={value =>
+                                    setSelectedFormat(
+                                        value || "Instagram Square (1:1)"
+                                    )
+                                }
+                                items={Object.keys(socialFormats).map(item => ({
+                                    label: item,
+                                    value: item,
+                                }))}
+                                placeholder={{
+                                    label: selectedFormat,
+                                    value: selectedFormat,
+                                }}
+                            />
 
-				{isUploading && (
-					<View className="mt-4">
-						<ActivityIndicator size="large" color="#ffffff" />
-					</View>
-				)}
+                            <View className="mt-6">
+                                <Text className="text-lg font-semibold text-white mb-2">
+                                    Preview:
+                                </Text>
 
-				<ScrollView>
-					{imageUri && (
-						<View className="mt-6">
-							<Text className="text-lg font-bold text-white mb-4">
-								Select Social Media Format
-							</Text>
+                                <ScrollView
+                                    contentContainerStyle={{
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    {uploadedImagePublicID && url && (
+                                        <Image
+                                            source={url}
+                                            style={{
+                                                width: "auto",
+                                                height: "auto",
+                                            }}
+                                        />
+                                    )}
+                                </ScrollView>
+                            </View>
 
-							<Select
-								onValueChange={value =>
-									setSelectedFormat(
-										value || "Instagram Square (1:1)"
-									)
-								}
-								items={Object.keys(socialFormats).map(item => ({
-									label: item,
-									value: item,
-								}))}
-								placeholder={{
-									label: selectedFormat,
-									value: selectedFormat,
-								}}
-							/>
-
-							<View className="mt-6">
-								<Text className="text-lg font-semibold text-white mb-2">
-									Preview:
-								</Text>
-
-								<ScrollView className="items-center">
-									{uploadedImagePublicID && url && (
-										<Image
-											source={{
-												uri: url,
-												width: socialFormats[selectedFormat].width,
-												height: socialFormats[selectedFormat].height,
-											}}
-										/>
-									)}
-								</ScrollView>
-							</View>
-
-							<View className="flex-row px-2 mt-6 w-full justify-between">
-								<TouchableOpacity
-									onPress={() => setImageUri(null)}
-									className="bg-white p-4  rounded-md"
-								>
-									<Text className="text-black">Remove</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									onPress={handleDownloadPress}
-									className="bg-white  p-4 rounded-md"
-								>
-									<Text className="text-black">Download</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					)}
-				</ScrollView>
-			</View>
-		</ScrollView>
-	)
+                            <View className="flex-row px-2 mt-6 w-full justify-between">
+                                <TouchableOpacity
+                                    onPress={() => setImageUri(null)}
+                                    className="bg-white p-4  rounded-md"
+                                >
+                                    <Text className="text-black">Remove</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={handleDownloadPress}
+                                    className="bg-white  p-4 rounded-md"
+                                >
+                                    <Text className="text-black">Download</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+                </ScrollView>
+            </View>
+        </ScrollView>
+    )
 }

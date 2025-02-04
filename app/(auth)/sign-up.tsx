@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Input, Button, Text } from "tamagui"
+import { TextInput, TouchableOpacity, Text } from "react-native"
 import { View } from "react-native"
 import { useSignUp } from "@clerk/clerk-expo"
 import { Link, useRouter } from "expo-router"
@@ -87,37 +87,31 @@ export default function SignUpScreen(): JSX.Element {
             </View>
             {error && (
                 <View className="mb-4 text-red-300">
-                    <Text className="text-red-500" color={"red"}>
-                        {error}
-                    </Text>
+                    <Text className="text-red-500">{error}</Text>
                 </View>
             )}
             <View className="w-full px-10">
                 {!formState.pendingVerification ? (
                     <>
                         <View className="gap-4 mb-4">
-                            <Input
+                            <TextInput
                                 autoCapitalize="none"
                                 value={formState.emailAddress}
                                 placeholder="Email..."
-                                borderColor={"gray"}
-                                backgroundColor={"black"}
-                                color={"white"}
-                                onChangeText={email =>
+                                className="border border-[#cccccc] text-white bg-black"
+                                onChangeText={(email: string) =>
                                     setFormState(prev => ({
                                         ...prev,
                                         emailAddress: email,
                                     }))
                                 }
                             />
-                            <Input
+                            <TextInput
                                 value={formState.password}
                                 placeholder="Password..."
-                                borderColor={"gray"}
-                                backgroundColor={"black"}
-                                color={"white"}
+                                className="border border-[#cccccc] text-white bg-black"
                                 secureTextEntry={true}
-                                onChangeText={password =>
+                                onChangeText={(password: string) =>
                                     setFormState(prev => ({
                                         ...prev,
                                         password: password,
@@ -126,34 +120,35 @@ export default function SignUpScreen(): JSX.Element {
                             />
                         </View>
 
-                        <Button onPress={onSignUpPress}>
+                        <TouchableOpacity onPress={onSignUpPress}>
                             {submitting ? "signing up..." : "Sign Up"}
-                        </Button>
+                        </TouchableOpacity>
                     </>
                 ) : (
                     <View>
-                        <Input
+                        <TextInput
                             value={formState.code}
                             placeholder="Code..."
-                            borderColor={"gray"}
-                            backgroundColor={"black"}
-                            color={"white"}
-                            onChangeText={code =>
+                            className="border border-[#cccccc] text-white bg-black"
+                            onChangeText={(code: string) =>
                                 setFormState(prev => ({
                                     ...prev,
                                     code: code,
                                 }))
                             }
                         />
-                        <Button onPress={onPressVerify} marginTop={7}>
+                        <TouchableOpacity
+                            onPress={onPressVerify}
+                            className="mt-7"
+                        >
                             {verifying ? "verifying..." : "Verify"}
-                        </Button>
+                        </TouchableOpacity>
                     </View>
                 )}
             </View>
 
             <View className="w-full px-4 items-center justify-center h-20 rounded-md mt-8">
-                <Text className="text-lg mr-2 text-white" color={"white"}>
+                <Text className="text-lg mr-2 text-white">
                     Already have an account?
                 </Text>
                 <Link className="text-purple-500 text-3xl" href="/sign-in">

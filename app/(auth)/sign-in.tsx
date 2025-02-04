@@ -1,6 +1,6 @@
 import { useSignIn } from "@clerk/clerk-expo"
 import { Link, useRouter } from "expo-router"
-import { Input, Button } from "tamagui"
+import { TextInput, TouchableOpacity } from "react-native"
 import { View, Text } from "react-native"
 import React from "react"
 import Logo from "@/components/Logo"
@@ -51,28 +51,27 @@ export default function Page() {
             )}
             <View className="w-full px-10 gap-4">
                 <View className="gap-4">
-                    <Input
+                    <TextInput
                         autoCapitalize="none"
                         value={emailAddress}
-                        borderColor={"gray"}
-                        color={"white"}
-                        backgroundColor={"black"}
+                        className="border border-[#cccccc] text-white bg-black"
                         placeholder="Email..."
                         onChangeText={email => setEmailAddress(email)}
                     />
-                    <Input
+                    <TextInput
                         value={password}
                         placeholder="Password..."
-                        borderColor={"gray"}
-                        color={"white"}
-                        backgroundColor={"black"}
+                        className="border border-[#cccccc] text-white bg-black"
                         secureTextEntry={true}
                         onChangeText={password => setPassword(password)}
                     />
                 </View>
-                <Button className="text-black" onPress={onSignInPress}>
+                <TouchableOpacity
+                    className="text-black"
+                    onPress={onSignInPress}
+                >
                     {submitting ? "sigining in..." : "Sign In"}
-                </Button>
+                </TouchableOpacity>
             </View>
 
             <View className="w-full px-4  items-center justify-center h-20 rounded-md mt-8">

@@ -22,7 +22,6 @@ import * as VideoPicker from "expo-image-picker"
 import { apiClient } from "@/lib/apiClient"
 import axios, { AxiosError } from "axios"
 import { CloudinaryUploadResult } from "@/app/api/imageupload+api"
-import { Progress } from "tamagui"
 import { cloudinaryConfg } from "@/lib/cloudinary"
 
 type FormErrors = { [key: string]: string }
