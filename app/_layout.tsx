@@ -8,13 +8,14 @@ import {
 } from "@react-navigation/native"
 import { Stack } from "expo-router"
 import { StatusBar } from "expo-status-bar"
+import useToken from "~/hooks/useToken"
 import * as React from "react"
 import { Platform } from "react-native"
 import { NAV_THEME } from "~/lib/constants"
 import { useColorScheme } from "~/lib/useColorScheme"
 import { PortalHost } from "@rn-primitives/portal"
-import { ThemeToggle } from "~/components/ThemeToggle"
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar"
+import { ClerkProvider } from "@clerk/clerk-expo"
 
 const LIGHT_THEME: Theme = {
    ...DefaultTheme,
@@ -25,15 +26,19 @@ const DARK_THEME: Theme = {
    colors: NAV_THEME.dark,
 }
 
-export {
-   // Catch any errors thrown by the Layout component.
-   ErrorBoundary,
-} from "expo-router"
+export { ErrorBoundary } from "expo-router"
 
 export default function RootLayout() {
    const hasMounted = React.useRef(false)
    const { colorScheme, isDarkColorScheme } = useColorScheme()
    const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
+
+   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
+   if (!publishableKey) {
+      throw new Error("Missing clerk publishable key!")
+   }
+
+   const { tokenCache } = useToken()
 
    useIsomorphicLayoutEffect(() => {
       if (hasMounted.current) {
@@ -55,17 +60,18 @@ export default function RootLayout() {
 
    return (
       <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-         <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-         <Stack>
-            <Stack.Screen
-               name="index"
-               options={{
-                  title: "Starter Base",
-                  headerRight: () => <ThemeToggle />,
-               }}
-            />
-         </Stack>
-         <PortalHost />
+         <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+            <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+            <Stack>
+               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+               <Stack.Screen name="+not-found" />
+               <Stack.Screen
+                  name="(application)"
+                  options={{ headerShown: false }}
+               />
+            </Stack>
+            <PortalHost />
+         </ClerkProvider>
       </ThemeProvider>
    )
 }
