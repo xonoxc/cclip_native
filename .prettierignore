@@ -1,0 +1,45 @@
+
+# Ignore node_modules folder
+node_modules/
+
+# Ignore build output
+.expo/
+.expo-shared/
+build/
+dist/
+out/
+
+# Ignore Android and iOS build folders
+android/
+ios/
+
+# Ignore environment and config files
+.env
+.env.*
+*.config.js
+
+# Ignore log files
+*.log
+
+# Ignore images and binary files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.ico
+*.mp4
+*.mov
+
+# Ignore test snapshots
+__snapshots__/
+*.snap
+
+# Ignore public assets
+public/
+assets/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
