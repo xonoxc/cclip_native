@@ -15,7 +15,6 @@ import {
    ScrollView,
    ActivityIndicator,
    Alert,
-   Platform,
 } from "react-native"
 import * as FileSystem from "expo-file-system"
 import * as ImagePicker from "expo-image-picker"
@@ -27,13 +26,8 @@ import { useImageTransformation } from "~/hooks/useTransformation"
 import React, { useCallback, useMemo, useState } from "react"
 
 import axios from "axios"
-import { apiClient } from "~/lib/apiClient"
 import { Button } from "~/components/ui/button"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-
-// to set the correct image mime type here
-import mime from "mime"
-import { convertURItoBlob } from "~/utils/image.conv"
 
 export default function ImageUploadScreen() {
    const [imageUri, setImageUri] = useState<string | null>(null)
@@ -63,6 +57,8 @@ export default function ImageUploadScreen() {
       []
    )
 
+   console.log("uploadedImagePublicId", uploadedImagePublicID)
+
    const handleImagePick = useCallback(async () => {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
       if (permission.granted) {
@@ -86,10 +82,12 @@ export default function ImageUploadScreen() {
       }
    }, [])
 
+   console.log("url", url)
+
    const handleImageUpload = useCallback(
-      async (uri: string) => {
+      async (fileUri: string) => {
          try {
-            if (!uri) {
+            if (!fileUri) {
                Alert.alert("Error", "No image selected")
                setImageUri(null)
                return
@@ -97,35 +95,26 @@ export default function ImageUploadScreen() {
 
             setIsUploading(true)
 
-            const formData = new FormData()
-            let fileUri = uri
-
-            if (Platform.OS === "ios") {
-               fileUri = uri.replace("file://", "")
-            }
-
             const fileInfo = await FileSystem.getInfoAsync(fileUri)
             if (!fileInfo.exists) {
                throw new Error("File not found")
             }
 
-            const file = convertURItoBlob(
+            const response = await FileSystem.uploadAsync(
+               `${process.env.EXPO_PUBLIC_SERVER_URL!}/api/image-upload`,
                fileUri,
-               mime.getType(fileUri) ?? "image/jpeg"
+               {
+                  httpMethod: "POST",
+                  uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+                  fieldName: "file",
+               }
             )
 
-            formData.append("upload_preset", "cclip_native")
-            formData.append("folder", "cclip")
-            formData.append("timestamp", (Date.now() / 1000).toString())
-            formData.append("file", file)
-
-            const uploadResponse = await apiClient.post(
-               "/api/image-upload",
-               formData
-            )
-
-            if (uploadResponse.status === 200) {
-               setUploadedImagePublicID(uploadResponse.data.public_id)
+            if (response.status === 200) {
+               const { publicId } = JSON.parse(response.body) as {
+                  publicId: string
+               }
+               setUploadedImagePublicID(publicId)
             }
          } catch (e) {
             if (axios.isAxiosError(e)) {
@@ -175,7 +164,7 @@ export default function ImageUploadScreen() {
    }, [])
 
    return (
-      <ScrollView className="flex-1 bg-black p-4">
+      <ScrollView className="flex-1 bg-black p-4 pb-96">
          <View className="mb-6 flex-1 items-start">
             <Text className="text-6xl font-bold text-[#cccccc] mt-2 ">
                Image
@@ -218,7 +207,7 @@ export default function ImageUploadScreen() {
                            label: selectedFormat,
                         }}
                         onValueChange={value =>
-                           setSelectedFormat(value?.value as SocialFormat)
+                           setSelectedFormat(value?.label as SocialFormat)
                         }
                         className="w-full"
                      >
@@ -257,14 +246,18 @@ export default function ImageUploadScreen() {
                            }}
                         >
                            {uploadedImagePublicID && url && (
-                              <Image
-                                 source={url}
-                                 style={{
-                                    width: 100,
-                                    height: 100,
-                                 }}
-                                 placeholder={blurhash}
-                              />
+                              <View>
+                                 <Image
+                                    source={url}
+                                    placeholder={blurhash}
+                                    style={{
+                                       height:
+                                          socialFormats[selectedFormat].height,
+                                       width: socialFormats[selectedFormat]
+                                          .width,
+                                    }}
+                                 />
+                              </View>
                            )}
                         </ScrollView>
                      </View>

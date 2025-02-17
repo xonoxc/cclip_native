@@ -22,7 +22,7 @@ const useImageTransformation = ({
       )
    }
    return {
-      url: `${baseURL}/c_fill,w_${width},h_${height},ar:${aspectRatio}/${publicID}`,
+      url: `${baseURL}/c_fill,w_${width},h_${height},ar_${aspectRatio}/${publicID}`,
    }
 }
 
