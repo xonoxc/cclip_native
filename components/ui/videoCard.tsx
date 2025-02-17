@@ -1,11 +1,12 @@
 import React, { useCallback } from "react"
-import { View, Text, Image, TouchableOpacity } from "react-native"
+import { View, Text, Image } from "react-native"
 import { Clock, Download, Trash } from "lucide-react-native"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Video } from "@prisma/client"
 import { cloud } from "~/lib/cloudinary"
 import { Button } from "./button"
+import { Progress } from "./progress"
 
 dayjs.extend(relativeTime)
 
@@ -20,8 +21,6 @@ const VideoCard = ({
 }) => {
    const getThumbnailUrl = useCallback((publicId: string) => {
       const baseURL = process.env.EXPO_PUBLIC_CLOUDINARY_THUMBNAIL_URL!
-      console.log("baseURL", baseURL)
-      console.log("publicId", publicId)
       if (!baseURL) {
          throw new Error(
             "Please set EXPO_PUBLIC_CLOUDINARY_FETCH_IMAGE_BASE_URL in .env"
@@ -79,15 +78,26 @@ const VideoCard = ({
             </Text>
             {video.compressedSize.toString() !== "undefined" ? (
                <View className="mb-2">
-                  <View className="flex-row justify-between text-sm text-white mb-1">
-                     <Text className="text-white">Compression</Text>
-                     <Text className="font-medium text-white">
-                        {calcCompressionPercentage(
-                           parseInt(video.compressedSize),
-                           parseInt(video.originalSize)
-                        )}
-                        %
-                     </Text>
+                  <View className="flex-col justify-between text-sm text-white mb-1">
+                     <View className="flex-row justify-between mb-1">
+                        <Text className="text-white">Compression</Text>
+                        <Text className="font-medium text-white">
+                           {calcCompressionPercentage(
+                              parseInt(video.compressedSize),
+                              parseInt(video.originalSize)
+                           )}
+                           %
+                        </Text>
+                     </View>
+
+                     <View className="flex-row items-center">
+                        <Progress
+                           value={calcCompressionPercentage(
+                              parseInt(video.compressedSize),
+                              parseInt(video.originalSize)
+                           )}
+                        />
+                     </View>
                   </View>
                </View>
             ) : (

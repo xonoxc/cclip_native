@@ -1,6 +1,11 @@
-import { SocialFormat, socialFormats } from "~/constants/formats"
-import React, { useCallback, useState } from "react"
-import * as FileSystem from "expo-file-system"
+import {
+   Select,
+   SelectContent,
+   SelectGroup,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from "~/components/ui/select"
 
 import * as Sharing from "expo-sharing"
 import {
@@ -10,16 +15,25 @@ import {
    ScrollView,
    ActivityIndicator,
    Alert,
+   Platform,
 } from "react-native"
+import * as FileSystem from "expo-file-system"
 import * as ImagePicker from "expo-image-picker"
 import { blurhash } from "~/constants/blur"
 import { Upload } from "lucide-react-native"
-import Select from "react-native-picker-select"
 import { Image } from "expo-image"
+import { SocialFormat, socialFormats } from "~/constants/formats"
 import { useImageTransformation } from "~/hooks/useTransformation"
+import React, { useCallback, useMemo, useState } from "react"
 
 import axios from "axios"
 import { apiClient } from "~/lib/apiClient"
+import { Button } from "~/components/ui/button"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+
+// to set the correct image mime type here
+import mime from "mime"
+import { convertURItoBlob } from "~/utils/image.conv"
 
 export default function ImageUploadScreen() {
    const [imageUri, setImageUri] = useState<string | null>(null)
@@ -37,6 +51,17 @@ export default function ImageUploadScreen() {
       aspectRatio: socialFormats[selectedFormat].aspectRatio,
       publicID: uploadedImagePublicID!,
    })
+
+   const insets = useSafeAreaInsets()
+   const contentInsets = useMemo(
+      () => ({
+         top: insets.top,
+         bottom: insets.bottom,
+         left: 0,
+         right: 16,
+      }),
+      []
+   )
 
    const handleImagePick = useCallback(async () => {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -66,31 +91,37 @@ export default function ImageUploadScreen() {
          try {
             if (!uri) {
                Alert.alert("Error", "No image selected")
+               setImageUri(null)
                return
             }
 
             setIsUploading(true)
 
             const formData = new FormData()
+            let fileUri = uri
 
-            formData.append("file", {
-               uri: uri,
-               type: "image/jpeg",
-               name: "image.jpg",
-            } as any)
+            if (Platform.OS === "ios") {
+               fileUri = uri.replace("file://", "")
+            }
+
+            const fileInfo = await FileSystem.getInfoAsync(fileUri)
+            if (!fileInfo.exists) {
+               throw new Error("File not found")
+            }
+
+            const file = convertURItoBlob(
+               fileUri,
+               mime.getType(fileUri) ?? "image/jpeg"
+            )
 
             formData.append("upload_preset", "cclip_native")
             formData.append("folder", "cclip")
             formData.append("timestamp", (Date.now() / 1000).toString())
+            formData.append("file", file)
 
             const uploadResponse = await apiClient.post(
-               "/imageupload",
-               formData,
-               {
-                  headers: {
-                     "Content-Type": "multipart/form-data",
-                  },
-               }
+               "/api/image-upload",
+               formData
             )
 
             if (uploadResponse.status === 200) {
@@ -158,13 +189,13 @@ export default function ImageUploadScreen() {
                      Upload an Image
                   </Text>
 
-                  <TouchableOpacity
+                  <Button
                      onPress={handleImagePick}
                      className="bg-gray-700 p-4 py-4 rounded-xl items-center flex flex-row  justify-center gap-2 space-x-2"
                   >
                      <Upload color={"white"} />
                      <Text className="text-white">Choose an image</Text>
-                  </TouchableOpacity>
+                  </Button>
                </>
             )}
 
@@ -182,18 +213,38 @@ export default function ImageUploadScreen() {
                      </Text>
 
                      <Select
-                        onValueChange={value =>
-                           setSelectedFormat(value || "Instagram Square (1:1)")
-                        }
-                        items={Object.keys(socialFormats).map(item => ({
-                           label: item,
-                           value: item,
-                        }))}
-                        placeholder={{
-                           label: selectedFormat,
+                        defaultValue={{
                            value: selectedFormat,
+                           label: selectedFormat,
                         }}
-                     />
+                        onValueChange={value =>
+                           setSelectedFormat(value?.value as SocialFormat)
+                        }
+                        className="w-full"
+                     >
+                        <SelectTrigger className="w-full">
+                           <SelectValue
+                              className="text-foreground text-sm native:text-lg"
+                              placeholder="Select a format"
+                           />
+                        </SelectTrigger>
+                        <SelectContent
+                           insets={contentInsets}
+                           className="relataive w-[85%]"
+                        >
+                           <SelectGroup>
+                              {Object.keys(socialFormats).map(format => (
+                                 <SelectItem
+                                    key={format}
+                                    value={format}
+                                    label={format}
+                                 >
+                                    {format}
+                                 </SelectItem>
+                              ))}
+                           </SelectGroup>
+                        </SelectContent>
+                     </Select>
 
                      <View className="mt-6">
                         <Text className="text-lg font-semibold text-white mb-2">
@@ -221,13 +272,13 @@ export default function ImageUploadScreen() {
                      <View className="flex-row px-2 mt-6 w-full justify-between">
                         <TouchableOpacity
                            onPress={() => setImageUri(null)}
-                           className="bg-white p-4  rounded-md"
+                           className="bg-white p-4  rounded-xl"
                         >
                            <Text className="text-black">Remove</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                            onPress={handleDownloadPress}
-                           className="bg-white  p-4 rounded-md"
+                           className="bg-white  p-4 rounded-xl"
                         >
                            <Text className="text-black">Download</Text>
                         </TouchableOpacity>

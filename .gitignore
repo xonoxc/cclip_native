@@ -43,3 +43,8 @@ expo-env.d.ts
 
 # actual env variable
 .env
+
+
+# android and ios build
+android/
+ios/

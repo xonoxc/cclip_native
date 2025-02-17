@@ -45,10 +45,6 @@ export default function RootLayout() {
          return
       }
 
-      if (Platform.OS === "web") {
-         // Adds the background color to the html element to prevent white background on overscroll.
-         document.documentElement.classList.add("bg-background")
-      }
       setAndroidNavigationBar(colorScheme)
       setIsColorSchemeLoaded(true)
       hasMounted.current = true
@@ -59,20 +55,29 @@ export default function RootLayout() {
    }
 
    return (
-      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-         <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-            <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-            <Stack>
-               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-               <Stack.Screen name="+not-found" />
-               <Stack.Screen
-                  name="(application)"
-                  options={{ headerShown: false }}
-               />
-            </Stack>
-            <PortalHost />
-         </ClerkProvider>
-      </ThemeProvider>
+      <>
+         <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+            <ClerkProvider
+               publishableKey={publishableKey}
+               tokenCache={tokenCache}
+            >
+               <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+               <Stack>
+                  <Stack.Screen
+                     name="(auth)"
+                     options={{ headerShown: false }}
+                  />
+                  <Stack.Screen name="+not-found" />
+                  <Stack.Screen
+                     name="(application)"
+                     options={{ headerShown: false }}
+                  />
+               </Stack>
+               <PortalHost />
+            </ClerkProvider>
+         </ThemeProvider>
+         <PortalHost />
+      </>
    )
 }
 

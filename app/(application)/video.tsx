@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react"
+import { Progress } from "~/components/ui/progress"
 import {
    View,
    Text,
@@ -20,7 +21,6 @@ import {
 } from "lucide-react-native"
 import * as VideoPicker from "expo-image-picker"
 import { apiClient } from "~/lib/apiClient"
-// import { Bar } from "expo-progress"
 import axios, { AxiosError } from "axios"
 
 type FormErrors = { [key: string]: string }
@@ -32,7 +32,7 @@ export default function VideoUpload() {
    const [title, setTitle] = useState<string>("")
    const [description, setDescription] = useState<string>("")
    const [isUploading, setIsUploading] = useState<boolean>(false)
-   const [_, setUploadProgress] = useState<number>(0)
+   const [uploadProgress, setUploadProgress] = useState<number>(0)
    const [errors, setErrors] = useState<FormErrors>({
       title: "",
       description: "",
@@ -297,14 +297,14 @@ export default function VideoUpload() {
                         )}
                      </View>
 
-                     {/* {isUploading && uploadProgress && ( */}
-                     {/*    <View className="my-3"> */}
-                     {/*       <Bar progress={uploadProgress} /> */}
-                     {/*       <Text className="text-white"> */}
-                     {/*          {uploadProgress}% uploaded */}
-                     {/*       </Text> */}
-                     {/*    </View> */}
-                     {/* )} */}
+                     {isUploading && uploadProgress && (
+                        <View className="my-3">
+                           <Progress value={uploadProgress} />
+                           <Text className="text-white">
+                              {uploadProgress}% uploaded
+                           </Text>
+                        </View>
+                     )}
                      <View className="space-y-3">
                         {isUploading && (
                            <TouchableOpacity
