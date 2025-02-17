@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react"
 import { Progress } from "~/components/ui/progress"
+import * as FileSystem from "expo-file-system"
 import {
    View,
    Text,
@@ -20,8 +21,7 @@ import {
    X,
 } from "lucide-react-native"
 import * as VideoPicker from "expo-image-picker"
-import { apiClient } from "~/lib/apiClient"
-import axios, { AxiosError } from "axios"
+import axios from "axios"
 
 type FormErrors = { [key: string]: string }
 
@@ -32,7 +32,6 @@ export default function VideoUpload() {
    const [title, setTitle] = useState<string>("")
    const [description, setDescription] = useState<string>("")
    const [isUploading, setIsUploading] = useState<boolean>(false)
-   const [uploadProgress, setUploadProgress] = useState<number>(0)
    const [errors, setErrors] = useState<FormErrors>({
       title: "",
       description: "",
@@ -65,34 +64,23 @@ export default function VideoUpload() {
    const createVideo = useCallback(async () => {
       if (!isValidData()) return
 
+      if (!fileUri) return
+
       setIsUploading(true)
       try {
          const formData = new FormData()
 
-         formData.append("file", {
-            uri: fileUri,
-            type: "video/mp4",
-            name: fileName,
-         } as any)
+         formData.append("title", fileName)
+         formData.append("description", description)
+         formData.append("originalSize", fileSize.toString())
 
-         formData.append("upload_preset", "cclip_native")
-         formData.append("folder", "cclip")
-         formData.append("timestamp", (Date.now() / 1000).toString())
-
-         const uploadResp = await apiClient.post(
-            `/api/video-upload`,
-            formData,
+         const uploadResp = await FileSystem.uploadAsync(
+            `${process.env.EXPO_PUBLIC_SERVER_URL!}/api/video-upload?title=${title}&description=${description}&originalSize=${fileSize}`,
+            fileUri,
             {
-               headers: {
-                  "Content-Type": "multipart/form-data",
-               },
-               onUploadProgress: progressEvent => {
-                  const { loaded, total } = progressEvent
-                  if (loaded && total) {
-                     const percent = Math.floor((loaded * 100) / total)
-                     setUploadProgress(percent)
-                  }
-               },
+               httpMethod: "POST",
+               uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+               fieldName: "file",
             }
          )
 
@@ -297,14 +285,6 @@ export default function VideoUpload() {
                         )}
                      </View>
 
-                     {isUploading && uploadProgress && (
-                        <View className="my-3">
-                           <Progress value={uploadProgress} />
-                           <Text className="text-white">
-                              {uploadProgress}% uploaded
-                           </Text>
-                        </View>
-                     )}
                      <View className="space-y-3">
                         {isUploading && (
                            <TouchableOpacity

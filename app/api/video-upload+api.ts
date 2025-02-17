@@ -13,6 +13,7 @@ interface VideoUploadResult extends CloudinaryUploadResult {
 }
 
 export async function POST(request: Request) {
+   const urlParams = new URL(request.url).searchParams
    try {
       if (
          !process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME ||
@@ -28,15 +29,14 @@ export async function POST(request: Request) {
       }
 
       const formData = await request.formData()
-      console.log("formData", formData)
       const file = formData.get("file") as File | null
 
       if (!file)
          return Response.json({ error: "File not found" }, { status: 400 })
 
-      const title = formData.get("title") as string
-      const description = formData.get("description") as string
-      const originalSize = formData.get("originalSize") as string
+      const title = urlParams.get("title") as string
+      const description = urlParams.get("description") as string
+      const originalSize = urlParams.get("originalSize") as string
 
       const bytes = await file?.arrayBuffer()
       const buffer = Buffer.from(bytes as ArrayBuffer)
