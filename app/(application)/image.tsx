@@ -108,30 +108,41 @@ export default function ImageUploadScreen() {
                      </Select>
 
                      <View className="mt-6">
-                        <Text className="text-lg font-semibold text-white mb-2">
-                           Preview:
-                        </Text>
+                        {!isUploading && uploadedImagePublicID ? (
+                           <>
+                              <Text className="text-lg font-semibold text-white mb-2">
+                                 Preview:
+                              </Text>
 
-                        <ScrollView
-                           contentContainerStyle={{
-                              alignItems: "center",
-                           }}
-                        >
-                           {uploadedImagePublicID && url && (
-                              <View>
-                                 <Image
-                                    source={url}
-                                    placeholder={blurhash}
-                                    style={{
-                                       height:
-                                          socialFormats[selectedFormat].height,
-                                       width: socialFormats[selectedFormat]
-                                          .width,
-                                    }}
-                                 />
-                              </View>
-                           )}
-                        </ScrollView>
+                              <ScrollView
+                                 contentContainerStyle={{
+                                    alignItems: "center",
+                                 }}
+                              >
+                                 {uploadedImagePublicID && url && (
+                                    <View>
+                                       <Image
+                                          source={url}
+                                          placeholder={blurhash}
+                                          style={{
+                                             height: 200,
+                                             width: 400,
+                                          }}
+                                          contentFit="contain"
+                                       />
+                                    </View>
+                                 )}
+                                 <Text className="text-white text-sm mt-2 bg-[#0f1014] p-2 rounded-xl outline-1">
+                                    {socialFormats[selectedFormat].width} x
+                                    {socialFormats[selectedFormat].height}
+                                 </Text>
+                              </ScrollView>
+                           </>
+                        ) : (
+                           <View>
+                              <Text>Loading...</Text>
+                           </View>
+                        )}
                      </View>
 
                      <View className="flex-row px-2 mt-6 w-full justify-between">
