@@ -66,7 +66,12 @@ export function useVideoUploadScreen() {
          )
 
          if (uploadResp.status === 200) {
-            router.push("/video")
+            router.replace("/")
+            setTitle("")
+            setDescription("")
+            setFileUri("")
+            setFileName("")
+            setFileSize(0)
          }
       } catch (e) {
          console.error("Error uploading video:", e)

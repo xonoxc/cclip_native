@@ -1,4 +1,4 @@
-import React, { useCallback } from "react"
+import React, { useCallback, useState } from "react"
 import { View, Text, Image, ActivityIndicator } from "react-native"
 import { Clock, Download, Trash } from "lucide-react-native"
 import dayjs from "dayjs"
@@ -13,14 +13,14 @@ dayjs.extend(relativeTime)
 const VideoCard = ({
    video,
    onDownload,
-   isDeleting,
    onDelete,
 }: {
    video: Video
-   isDeleting: boolean
-   onDownload: (url: string, publicId: string) => void
+   onDownload: (url: string, publicId: string) => Promise<void>
    onDelete: (videoId: string, publicId: string) => void
 }) => {
+   const [isDeleting, setIsDeleting] = useState<boolean>(false)
+
    const getThumbnailUrl = useCallback((publicId: string) => {
       const baseURL = process.env.EXPO_PUBLIC_CLOUDINARY_THUMBNAIL_URL!
       if (!baseURL) {
@@ -49,6 +49,12 @@ const VideoCard = ({
       },
       []
    )
+
+   const handlerCardDeleteButtonClick = useCallback(async () => {
+      setIsDeleting(true)
+      await onDelete(video.id, video.publicId)
+      setIsDeleting(false)
+   }, [])
 
    return (
       <View className="bg-[#161617] border border-white/10 rounded-3xl overflow-hidden m-2 flex-1">
@@ -118,11 +124,11 @@ const VideoCard = ({
                   <Text className="text-black">Download</Text>
                </Button>
                <Button
-                  onPress={() => onDelete(video.id, video.publicId)}
+                  onPress={handlerCardDeleteButtonClick}
                   className="bg-white text-white p-2 rounded-xl"
                >
                   {isDeleting ? (
-                     <ActivityIndicator size="small" />
+                     <ActivityIndicator size="small" color={"#000000"} />
                   ) : (
                      <Trash className="w-4 h-4 text-black" color={"black"} />
                   )}

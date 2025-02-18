@@ -1,16 +1,16 @@
 import * as FileSystem from "expo-file-system"
 import * as Sharing from "expo-sharing"
 import { Video } from "@prisma/client"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { apiClient } from "~/lib/apiClient"
 import { AxiosError } from "axios"
 import { Alert } from "react-native"
+import { useFocusEffect } from "expo-router"
 
 export const useIndexScreen = () => {
    const [videos, setVideos] = useState<Video[]>([])
    const [loading, setLoading] = useState<boolean>(true)
    const [error, setError] = useState<string | null>("")
-   const [isDeleting, setIsDeleting] = useState<boolean>(false)
 
    const fetchVideos = useCallback(async () => {
       if (!loading) setLoading(true)
@@ -29,20 +29,21 @@ export const useIndexScreen = () => {
       }
    }, [])
 
-   useEffect(() => {
+   useFocusEffect(() => {
       fetchVideos()
-   }, [])
+   })
 
    const handleDeletePress = useCallback(
       async (videoId: string, publicId: string) => {
-         setIsDeleting(true)
          try {
             const deleteVideoResponse = await apiClient.delete(
                `/api/videos?video_id=${videoId}&public_id=${publicId}`
             )
 
             if (deleteVideoResponse.status === 200) {
-               Alert.alert("Video deleted succesfully!")
+               setVideos(prevVideos =>
+                  prevVideos.filter(video => video.id !== videoId)
+               )
             }
          } catch (e) {
             if (e instanceof AxiosError) {
@@ -50,8 +51,6 @@ export const useIndexScreen = () => {
             } else {
                console.error("Unexpected Error:", e)
             }
-         } finally {
-            setIsDeleting(false)
          }
       },
       []
@@ -95,7 +94,6 @@ export const useIndexScreen = () => {
       videos,
       handleDeletePress,
       handleDownloadPress,
-      isDeleting,
       fetchVideos,
    }
 }

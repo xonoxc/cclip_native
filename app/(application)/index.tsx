@@ -7,7 +7,6 @@ export default function HomeScreen() {
    const {
       loading,
       videos,
-      isDeleting,
       handleDownloadPress,
       handleDeletePress,
       error,
@@ -20,7 +19,10 @@ export default function HomeScreen() {
 
          {loading ? (
             <View className="flex-1 justify-center items-center">
-               <ActivityIndicator size="large" color="#ffffff" />
+               <ActivityIndicator
+                  size="large"
+                  className="bg-black text-white"
+               />
             </View>
          ) : videos.length === 0 ? (
             <View className="flex-1 justify-center items-center">
@@ -37,7 +39,6 @@ export default function HomeScreen() {
                   keyExtractor={item => item.id.toString()}
                   renderItem={({ item }) => (
                      <VideoCard
-                        isDeleting={isDeleting}
                         video={item}
                         onDownload={handleDownloadPress}
                         onDelete={handleDeletePress}
