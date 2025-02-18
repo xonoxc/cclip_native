@@ -1,5 +1,6 @@
 import "~/global.css"
 
+import { useFonts } from "expo-font"
 import {
    DarkTheme,
    DefaultTheme,
@@ -10,12 +11,13 @@ import { Stack } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import useToken from "~/hooks/useToken"
 import * as React from "react"
+import * as SplashScreen from "expo-splash-screen"
 import { Platform } from "react-native"
 import { NAV_THEME } from "~/lib/constants"
 import { useColorScheme } from "~/lib/useColorScheme"
 import { PortalHost } from "@rn-primitives/portal"
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar"
-import { ClerkProvider } from "@clerk/clerk-expo"
+import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo"
 
 const LIGHT_THEME: Theme = {
    ...DefaultTheme,
@@ -25,6 +27,8 @@ const DARK_THEME: Theme = {
    ...DarkTheme,
    colors: NAV_THEME.dark,
 }
+
+SplashScreen.preventAutoHideAsync()
 
 export { ErrorBoundary } from "expo-router"
 
@@ -50,38 +54,47 @@ export default function RootLayout() {
       hasMounted.current = true
    }, [])
 
-   if (!isColorSchemeLoaded) {
+   const [loaded] = useFonts({
+      SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+   })
+
+   React.useEffect(() => {
+      if (loaded) {
+         SplashScreen.hideAsync()
+      }
+   }, [loaded])
+
+   if (!isColorSchemeLoaded || !loaded) {
       return null
    }
 
    return (
       <>
-         <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-            <ClerkProvider
-               publishableKey={publishableKey}
-               tokenCache={tokenCache}
-            >
+         <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+            <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
                <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-               <Stack>
-                  <Stack.Screen
-                     name="(auth)"
-                     options={{ headerShown: false }}
-                  />
-                  <Stack.Screen name="+not-found" />
-                  <Stack.Screen
-                     name="(application)"
-                     options={{ headerShown: false }}
-                  />
-               </Stack>
+               <ClerkLoaded>
+                  <Stack>
+                     <Stack.Screen
+                        name="(auth)"
+                        options={{ headerShown: false }}
+                     />
+                     <Stack.Screen name="+not-found" />
+                     <Stack.Screen
+                        name="(application)"
+                        options={{ headerShown: false }}
+                     />
+                  </Stack>
+               </ClerkLoaded>
                <PortalHost />
-            </ClerkProvider>
-         </ThemeProvider>
-         <PortalHost />
+            </ThemeProvider>
+            <PortalHost />
+         </ClerkProvider>
       </>
    )
 }
 
 const useIsomorphicLayoutEffect =
    Platform.OS === "web" && typeof window === "undefined"
-      ? React.useEffect
-      : React.useLayoutEffect
+      ? React.useLayoutEffect
+      : React.useEffect
