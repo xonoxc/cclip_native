@@ -17,7 +17,7 @@ import {
    FileText,
    X,
 } from "lucide-react-native"
-import { useVideoUploadScreen } from "~/hooks/useVideoScreen"
+import { useVideoUploadScreen } from "~/hooks/screens/useVideoScreen"
 
 export default function VideoUpload() {
    const {

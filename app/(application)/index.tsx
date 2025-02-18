@@ -1,6 +1,6 @@
 import { View, Text, ActivityIndicator, FlatList } from "react-native"
 import VideoCard from "~/components/ui/videoCard"
-import { useIndexScreen } from "~/hooks/useIndexScreen"
+import { useIndexScreen } from "~/hooks/screens/useIndexScreen"
 import { RefreshControl } from "react-native-gesture-handler"
 
 export default function HomeScreen() {
