@@ -10,6 +10,7 @@ export const useIndexScreen = () => {
    const [videos, setVideos] = useState<Video[]>([])
    const [loading, setLoading] = useState<boolean>(true)
    const [error, setError] = useState<string | null>("")
+   const [isDeleting, setIsDeleting] = useState<boolean>(false)
 
    const fetchVideos = useCallback(async () => {
       if (!loading) setLoading(true)
@@ -33,24 +34,24 @@ export const useIndexScreen = () => {
    }, [])
 
    const handleDeletePress = useCallback(
-      async (videoId: string, public_id: string) => {
+      async (videoId: string, publicId: string) => {
+         setIsDeleting(true)
          try {
-            const deleteResponse = await apiClient.delete("/api/videos", {
-               data: {
-                  videoId,
-                  public_id,
-               },
-            })
+            const deleteVideoResponse = await apiClient.delete(
+               `/api/videos?video_id=${videoId}&public_id=${publicId}`
+            )
 
-            if (deleteResponse.status === 200) {
-               setVideos(prev => prev.filter(video => video.id !== videoId))
+            if (deleteVideoResponse.status === 200) {
+               Alert.alert("Video deleted succesfully!")
             }
          } catch (e) {
             if (e instanceof AxiosError) {
-               console.error("error deleting video", e.message)
-               return
+               console.error("VideoDeleteError:", e.response?.data.error)
+            } else {
+               console.error("Unexpected Error:", e)
             }
-            console.log("error:", JSON.stringify(e))
+         } finally {
+            setIsDeleting(false)
          }
       },
       []
@@ -94,6 +95,7 @@ export const useIndexScreen = () => {
       videos,
       handleDeletePress,
       handleDownloadPress,
+      isDeleting,
       fetchVideos,
    }
 }

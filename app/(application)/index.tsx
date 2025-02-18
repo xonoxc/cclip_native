@@ -7,6 +7,7 @@ export default function HomeScreen() {
    const {
       loading,
       videos,
+      isDeleting,
       handleDownloadPress,
       handleDeletePress,
       error,
@@ -36,6 +37,7 @@ export default function HomeScreen() {
                   keyExtractor={item => item.id.toString()}
                   renderItem={({ item }) => (
                      <VideoCard
+                        isDeleting={isDeleting}
                         video={item}
                         onDownload={handleDownloadPress}
                         onDelete={handleDeletePress}

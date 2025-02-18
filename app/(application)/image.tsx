@@ -26,7 +26,6 @@ import { useImageTransformation } from "~/hooks/useTransformation"
 import React, { useCallback, useMemo, useState } from "react"
 
 import axios from "axios"
-import { Button } from "~/components/ui/button"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 export default function ImageUploadScreen() {
@@ -57,8 +56,6 @@ export default function ImageUploadScreen() {
       []
    )
 
-   console.log("uploadedImagePublicId", uploadedImagePublicID)
-
    const handleImagePick = useCallback(async () => {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
       if (permission.granted) {
@@ -81,8 +78,6 @@ export default function ImageUploadScreen() {
          alert("Permission to access media library is required!")
       }
    }, [])
-
-   console.log("url", url)
 
    const handleImageUpload = useCallback(
       async (fileUri: string) => {
@@ -178,13 +173,13 @@ export default function ImageUploadScreen() {
                      Upload an Image
                   </Text>
 
-                  <Button
+                  <TouchableOpacity
                      onPress={handleImagePick}
-                     className="bg-gray-700 p-4 py-4 rounded-xl items-center flex flex-row  justify-center gap-2 space-x-2"
+                     className="bg-white p-4 py-4 rounded-xl items-center flex flex-row  justify-center gap-2 space-x-2"
                   >
-                     <Upload color={"white"} />
-                     <Text className="text-white">Choose an image</Text>
-                  </Button>
+                     <Upload color={"black"} />
+                     <Text className="text-black">Choose an image</Text>
+                  </TouchableOpacity>
                </>
             )}
 

@@ -21,8 +21,10 @@ export async function GET(_: Request) {
 
 export async function DELETE(request: Request) {
    try {
-      const { videoId, public_id }: { videoId: string; public_id: string } =
-         await request.json()
+      const searchParams = new URL(request.url).searchParams
+
+      const videoId = searchParams.get("video_id")
+      const public_id = searchParams.get("public_id")
 
       if (!videoId || !public_id) {
          return Response.json(
@@ -32,8 +34,6 @@ export async function DELETE(request: Request) {
             { status: 400 }
          )
       }
-
-      console.log("crednentials found...")
 
       const cloudinaryResponse = await cloudinary.uploader.destroy(public_id, {
          resource_type: "video",

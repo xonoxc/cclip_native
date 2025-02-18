@@ -1,5 +1,5 @@
 import React, { useCallback } from "react"
-import { View, Text, Image } from "react-native"
+import { View, Text, Image, ActivityIndicator } from "react-native"
 import { Clock, Download, Trash } from "lucide-react-native"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
@@ -13,9 +13,11 @@ dayjs.extend(relativeTime)
 const VideoCard = ({
    video,
    onDownload,
+   isDeleting,
    onDelete,
 }: {
    video: Video
+   isDeleting: boolean
    onDownload: (url: string, publicId: string) => void
    onDelete: (videoId: string, publicId: string) => void
 }) => {
@@ -119,7 +121,11 @@ const VideoCard = ({
                   onPress={() => onDelete(video.id, video.publicId)}
                   className="bg-white text-white p-2 rounded-xl"
                >
-                  <Trash className="w-4 h-4 text-black" color={"black"} />
+                  {isDeleting ? (
+                     <ActivityIndicator size="small" />
+                  ) : (
+                     <Trash className="w-4 h-4 text-black" color={"black"} />
+                  )}
                </Button>
             </View>
          </View>
