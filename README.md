@@ -26,16 +26,16 @@ Native application for [cclip](https://github.com/xonoxc/cclip.git).
 
 ## Screenshots
 
-![Video Listing]("./assets/images/screens/video_listing_screen_cclip_native.jpg")
+![Video Listing](./assets/images/screens/video_listing_screen_cclip_native.jpg)
 
 
-![Image Transform]("./assets/images/screens/image_transformation_screen_cclip_native.jpg")
+![Image Transform](./assets/images/screens/image_transformation_screen_cclip_native.jpg)
 
 
-![Video Upload]("./assets/images/screens/video_upload_screen_cclip_native.jpg")
+![Video Upload](./assets/images/screens/video_upload_screen_cclip_native.jpg)
 
 
-![Account Screen]("./assets/images/screens/account_screen_cclip_native.jpg")
+![Account Screen](./assets/images/screens/account_screen_cclip_native.jpg)
 
 ## Getting Started
 
